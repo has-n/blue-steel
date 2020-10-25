@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Blue Steel</title>
+        <link rel="stylesheet" type="text/css" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+        <script defer src="app.js"></script>
+    </head>
+    <body class="bg-light">
+        <div class="container">
+            <div class="py-5">
+                <h2 class="text-left">blue steel</h2>
+            </div>
+            <div class="row">
+                <div class="col-md-5 mb-3">
+                    <select class="custom-select d-block w-100" id="country" required>
+                        <option value="">Screen Only</option>
+                        <option>Screen & Camera</option>
+                        <option>Camera Only</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <select class="custom-select d-block w-100" id="state" required>
+                        <option value="">Choose...</option>
+                        <option>California</option>
+                    </select>
+                </div>
+            </div>
+            <hr class="mb-4">
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="same-address">
+                <label class="custom-control-label" for="same-address">Shipping address is the same as my billing
+                    address
+</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" id="save-info">
+                <label class="custom-control-label" for="save-info">Save this information for next time</label>
+            </div>
+            <hr class="mb-4">
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Start Recording</button>
+        </form>
+    </div>
+</div>
