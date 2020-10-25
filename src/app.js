@@ -15,11 +15,14 @@ const {
 var recordedChunks = [];
 var mediaRecorder;
 var recordingState = false;
+var audioContext = new AudioContext();
+var videoStream, desktopStream, micStream, webcamStream;
 
 //Configuration
 const recordingObject = document.getElementById("recordingObject");
 const startRecordButton = document.getElementById("startRecordButton");
 const stopRecordButton = document.getElementById("stopRecordButton");
+const webcamPreview = document.getElementById("webcamPreview");
 
 //Bootstrap
 document.addEventListener("DOMContentLoaded", () => {
@@ -29,14 +32,49 @@ document.addEventListener("DOMContentLoaded", () => {
 
 function stopRecording() {
     recordingState = false;
+
+    shutdownWebcamStream();
+    shutdownVideoStream();
+    shutdownMicStream();
+    shutdownDesktopStream();
     toggleRecordButton();
 
     mediaRecorder.stop();
 }
 
+function shutdownDesktopStream(){
+    if (desktopStream.active){
+        desktopStream.getTracks().forEach(track =>{
+            track.stop();
+        });
+    }
+}
+function shutdownMicStream(){
+    if (micStream.active){
+        micStream.getTracks().forEach(track =>{
+            track.stop();
+        });
+    }
+}
+function shutdownVideoStream(){
+    if (videoStream.active){
+        videoStream.getTracks().forEach(track =>{
+            track.stop();
+        });
+    }
+}
+
+function shutdownWebcamStream(){
+    if (webcamStream.active){
+        webcamStream.getTracks().forEach(track =>{
+            track.stop();
+        });
+    }
+}
+
 async function startRecording() {
     //clean up in case we have recorded before
-    recordedChunks= [];
+    recordedChunks = [];
 
     //if already recording, stop recording
     if (recordingState) {
@@ -53,23 +91,55 @@ async function startRecording() {
         }
     };
 
-    const videoStream = await navigator.mediaDevices.getUserMedia(constraintsVideo);
+    videoStream = await navigator.mediaDevices.getUserMedia(constraintsVideo);
 
-    const constraintsAudio = {
-        audio:true,
-        video:false,
+    const constraintsMic = {
+        audio: true,
+        video: false,
     }
 
-    const audioStream = await navigator.mediaDevices.getUserMedia(constraintsAudio);
+    micStream = await navigator.mediaDevices.getUserMedia(constraintsMic);
 
-    //const combinedStream = new MediaStream([...videoStream.getVideoTracks(), ...audioStream.getAudioTracks()]);
+    const constraintsDesktop = {
+        audio: {
+            mandatory: {
+                chromeMediaSource: "desktop"
+            }
+        },
+        video: {
+            mandatory: {
+                chromeMediaSource: "desktop"
+            }
+        }
+    }
 
-    let audioTracks = audioStream.getAudioTracks();
-    audioTracks.forEach(track => {
-        console.log(track);
-    });
-    videoStream.addTrack(audioTracks[0]);
+    desktopStream = await navigator.mediaDevices.getUserMedia(constraintsDesktop);
 
+    const webcamConstraints = {
+        audio:false,
+        video:{
+            mandatory:{
+                minHeight:480,
+                minWidth:300,
+                maxHeight:480,
+                maxWidth:300,
+            }
+        }
+    }
+
+    webcamStream = await navigator.mediaDevices.getUserMedia(webcamConstraints);
+
+    webcamPreview.srcObject =webcamStream;
+    webcamPreview.play();
+
+    let desktopSource = audioContext.createMediaStreamSource(desktopStream);
+    let micSource = audioContext.createMediaStreamSource(micStream);
+    let destination = audioContext.createMediaStreamDestination();
+
+    desktopSource.connect(destination);
+    micSource.connect(destination);
+
+    videoStream.addTrack(...destination.stream.getAudioTracks());
     mediaRecorder = new MediaRecorder(videoStream);
 
     mediaRecorder.start();
@@ -161,11 +231,11 @@ async function getVideoSources(types) {
     return sources;
 }
 
-async function getMicSources(){
+async function getMicSources() {
 
 }
 
-function writeMicOptions(element,options){
+function writeMicOptions(element, options) {
 
 }
 
@@ -173,7 +243,7 @@ function writeMicOptions(element,options){
 (async () => {
     var screenOptions = await getVideoSources(["screen"]);
     writeVideoOptions(recordingObject, screenOptions);
-/* 
-    var micOptions = await getMicSources();
-    writeMicOptions(micObject,micOptions); */
+    /* 
+        var micOptions = await getMicSources();
+        writeMicOptions(micObject,micOptions); */
 })();
