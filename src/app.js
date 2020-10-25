@@ -30,7 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function stopRecording() {
     recordingState = false;
     toggleRecordButton();
-    
+
     mediaRecorder.stop();
 }
 
@@ -51,10 +51,8 @@ async function startRecording() {
     };
 
     const stream = await navigator.mediaDevices.getUserMedia(constraints);
-    const options = {
-        mimeType: "video/webm; codecs=vp9"
-    };
-    mediaRecorder = new MediaRecorder(stream, options);
+
+    mediaRecorder = new MediaRecorder(stream);
 
     mediaRecorder.start();
     recordingState = true;
@@ -66,11 +64,11 @@ async function startRecording() {
 
 function toggleRecordButton() {
     if (recordingState) {
-        startRecordButton.style.display="none";
-        stopRecordButton.style.display="block";
+        startRecordButton.style.display = "none";
+        stopRecordButton.style.display = "block";
     } else {
-        startRecordButton.style.display="block";
-        stopRecordButton.style.display="none";
+        startRecordButton.style.display = "block";
+        stopRecordButton.style.display = "none";
     }
 }
 
@@ -81,16 +79,18 @@ function handleDataAvailable(chunk) {
 async function handleStop() {
 
     const blob = new Blob(recordedChunks, {
-        type: "video/webm; codecs=vp9"
+        type: "video/mp4"
     });
 
-    const buffer = Buffer.from(await blob.arrayBuffer());
+    var arrayBuffer = await getArrayBuffer(blob);
+
+    var buffer = createBuffer(arrayBuffer);
 
     const {
         filePath
     } = await dialog.showSaveDialog({
         buttonLabel: "Save recording",
-        defaultPath: "video.webm"
+        defaultPath: `recording-${Date.now()}.mp4`
     });
 
     if (filePath) {
@@ -98,6 +98,33 @@ async function handleStop() {
             console.log("Erro ?" + error);
         })
     }
+}
+
+function fileReaderReady(reader) {
+    return new Promise(function (resolve, reject) {
+        reader.onload = function () {
+            resolve(reader.result);
+        }
+        reader.onerror = function () {
+            reject(reader.error);
+        }
+    })
+}
+
+function getArrayBuffer(blob) {
+    var reader = new FileReader();
+    var promise = fileReaderReady(reader);
+    reader.readAsArrayBuffer(blob);
+    return promise;
+}
+
+function createBuffer(arrayBuffer) {
+    let buffer = new Buffer(arrayBuffer.byteLength);
+    let arr = new Uint8Array(arrayBuffer);
+    for (let i = 0; i < arr.byteLength; i++) {
+        buffer[i] = arr[i];
+    }
+    return buffer;
 }
 
 function writeVideoOptions(element, options) {
