@@ -35,12 +35,15 @@ function stopRecording() {
 }
 
 async function startRecording() {
+    //clean up in case we have recorded before
+    recordedChunks= [];
+
     //if already recording, stop recording
     if (recordingState) {
         stopRecording();
     }
 
-    const constraints = {
+    const constraintsVideo = {
         audio: false,
         video: {
             mandatory: {
@@ -50,9 +53,24 @@ async function startRecording() {
         }
     };
 
-    const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    const videoStream = await navigator.mediaDevices.getUserMedia(constraintsVideo);
 
-    mediaRecorder = new MediaRecorder(stream);
+    const constraintsAudio = {
+        audio:true,
+        video:false,
+    }
+
+    const audioStream = await navigator.mediaDevices.getUserMedia(constraintsAudio);
+
+    //const combinedStream = new MediaStream([...videoStream.getVideoTracks(), ...audioStream.getAudioTracks()]);
+
+    let audioTracks = audioStream.getAudioTracks();
+    audioTracks.forEach(track => {
+        console.log(track);
+    });
+    videoStream.addTrack(audioTracks[0]);
+
+    mediaRecorder = new MediaRecorder(videoStream);
 
     mediaRecorder.start();
     recordingState = true;
@@ -143,8 +161,19 @@ async function getVideoSources(types) {
     return sources;
 }
 
+async function getMicSources(){
+
+}
+
+function writeMicOptions(element,options){
+
+}
+
 //Bootstrap
 (async () => {
     var screenOptions = await getVideoSources(["screen"]);
     writeVideoOptions(recordingObject, screenOptions);
+/* 
+    var micOptions = await getMicSources();
+    writeMicOptions(micObject,micOptions); */
 })();
