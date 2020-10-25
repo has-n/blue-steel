@@ -12,9 +12,9 @@ let mainWindow;
 const createWindow = () => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 400,
-    height: 600,
-    resizable:false,
+    width: 800,
+    height: 1200,
+    //resizable:false,
     webPreferences:{
       nodeIntegration:true,
     }
@@ -26,7 +26,7 @@ const createWindow = () => {
   mainWindow.loadURL(`file://${__dirname}/index.html`);
 
   // Open the DevTools.
-  //mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
