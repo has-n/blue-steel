@@ -23,6 +23,8 @@ var videoStream, desktopStream, micStream, webcamStream;
 const recordingObject = document.getElementById("recordingObject");
 const startRecordButton = document.getElementById("startRecordButton");
 const stopRecordButton = document.getElementById("stopRecordButton");
+const cameraObject = document.getElementById("cameraOptions");
+const micObject = document.getElementById("micOptions"); 
 
 //Bootstrap
 document.addEventListener("DOMContentLoaded", () => {
@@ -216,19 +218,47 @@ async function getVideoSources(types) {
     return sources;
 }
 
-async function getMicSources() {
-
+function writeMicOptions(element, options) {
+    options.map(option=>{
+        var optionItem = documen.createElement("option");
+        optionItem.text = option.label;
+        optionItem.value = option.deviceId;
+        element.add(optionItem);
+    });
 }
 
-function writeMicOptions(element, options) {
+function writeCameraOptions(element,options){
+    options.map(option=>{
+        var optionItem = documen.createElement("option");
+        optionItem.text = option.label;
+        optionItem.value = option.deviceId;
+        element.add(optionItem);
+    });
+}
 
+async function getDeviceSources() {
+    var devices = await navigator.mediaDevices.enumerateDevices();
+
+    var cameraOptions = devices.filter(device => device.kind == "videoinput");
+    var micOptions = devices.filter(device => device.kind == "audioinput");
+
+    return {
+        cameraOptions,
+        micOptions
+    };
 }
 
 //Bootstrap
 (async () => {
     var screenOptions = await getVideoSources(["screen"]);
     writeVideoOptions(recordingObject, screenOptions);
-    /* 
-        var micOptions = await getMicSources();
-        writeMicOptions(micObject,micOptions); */
+
+    var {
+        cameraOptions,
+        micOptions
+    } = await getDeviceSources();
+
+    writeCameraOptions(cameraObject,cameraOptions);
+    writeMicOptions(micObject,micOptions);
+
 })();
