@@ -35,17 +35,26 @@ const createWindow = () => {
 const createWebcamPreviewWindow = () => {
   webcamPreviewDialog = new BrowserWindow({
     parent: mainWindow,
-    width: 400,
+    width: 350,
     height: 250,
-    show:false,
-    frame:false,
-    resizable:false,
+    show: false,
+    frame: false,
+    resizable: false,
     webPreferences: {
       nodeIntegration: true,
     }
   });
   webcamPreviewDialog.setAlwaysOnTop(true);
   webcamPreviewDialog.loadURL(`file://${__dirname}/camera.html`);
+
+  webcamPreviewDialog.once("ready-to-show", () => {
+    let [width, height] = webcamPreviewDialog.getSize();
+    try {
+      webcamPreviewDialog.setSize(width, height);
+    } catch (e) {
+
+    }
+  });
 }
 
 app.on('ready', () => {
@@ -66,9 +75,9 @@ app.on('activate', () => {
 });
 
 
-ipcMain.on("launch-webcam-window", (event,options) => {
+ipcMain.on("launch-webcam-window", (event, options) => {
   webcamPreviewDialog.show();
-  webcamPreviewDialog.webContents.send("startWebcamStreamEvent",options);
+  webcamPreviewDialog.webContents.send("startWebcamStreamEvent", options);
 });
 
 ipcMain.on("close-webcam-window", () => {
