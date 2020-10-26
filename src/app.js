@@ -24,7 +24,7 @@ const recordingObject = document.getElementById("recordingObject");
 const startRecordButton = document.getElementById("startRecordButton");
 const stopRecordButton = document.getElementById("stopRecordButton");
 const cameraObject = document.getElementById("cameraOptions");
-const micObject = document.getElementById("micOptions"); 
+const micObject = document.getElementById("micOptions");
 
 //Bootstrap
 document.addEventListener("DOMContentLoaded", () => {
@@ -94,7 +94,11 @@ async function startRecording() {
     videoStream = await navigator.mediaDevices.getUserMedia(constraintsVideo);
 
     const constraintsMic = {
-        audio: true,
+        audio: {
+            mandatory: {
+                chromeMediaSourceId: micObject.value
+            }
+        },
         video: false,
     }
 
@@ -115,9 +119,12 @@ async function startRecording() {
 
     desktopStream = await navigator.mediaDevices.getUserMedia(constraintsDesktop);
 
-    ipcRenderer.send("launch-webcam-window", {
-        deviceId: cameraObject.value,
-    });
+    //if user has selected webcam, launch it
+    if (cameraObject.value!=0) {
+        ipcRenderer.send("launch-webcam-window", {
+            deviceId: cameraObject.value,
+        });
+    }
 
     let desktopSource = audioContext.createMediaStreamSource(desktopStream);
     let micSource = audioContext.createMediaStreamSource(micStream);
@@ -219,7 +226,7 @@ async function getVideoSources(types) {
 }
 
 function writeMicOptions(element, options) {
-    options.map(option=>{
+    options.map(option => {
         var optionItem = document.createElement("option");
         optionItem.text = option.label;
         optionItem.value = option.deviceId;
@@ -227,8 +234,8 @@ function writeMicOptions(element, options) {
     });
 }
 
-function writeCameraOptions(element,options){
-    options.map(option=>{
+function writeCameraOptions(element, options) {
+    options.map(option => {
         var optionItem = document.createElement("option");
         optionItem.text = option.label;
         optionItem.value = option.deviceId;
@@ -258,7 +265,7 @@ async function getDeviceSources() {
         micOptions
     } = await getDeviceSources();
 
-    writeCameraOptions(cameraObject,cameraOptions);
-    writeMicOptions(micObject,micOptions);
+    writeCameraOptions(cameraObject, cameraOptions);
+    writeMicOptions(micObject, micOptions);
 
 })();
