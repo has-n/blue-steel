@@ -13,6 +13,8 @@ const {
 } = remote;
 
 const Store = require("electron-store");
+const ncClient = require("./NCClient.js");
+const path = require("path");
 
 //Globally scoped variables
 var recordedChunks = [];
@@ -183,7 +185,17 @@ async function handleStop() {
     var buffer = createBuffer(arrayBuffer);
 
     if (store.get("nextCloudUpload")) {
-        console.log("uploading to NC")
+        let tempFileName = `recording-${Date.now()}.mp4`;
+        let tempFolderPath = store.get("tempFolderPath");
+        let filePath = path.join(tempFolderPath,tempFileName);
+        writeFile(filePath, buffer, (error) => {
+            if (error) {
+                console.log("Error " + error);
+            }
+        });
+
+        ncClient.uploadFile({tempFileName,filePath});
+
     } else {
         const {
             filePath
@@ -194,7 +206,9 @@ async function handleStop() {
 
         if (filePath) {
             writeFile(filePath, buffer, (error) => {
-                console.log("Erro ?" + error);
+                if (error) {
+                    console.log("Erro ?" + error);
+                }
             })
         }
     }
