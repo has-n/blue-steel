@@ -150,12 +150,12 @@ async function startRecording() {
     mediaRecorder.onstop = handleStop;
 }
 
-function saveConfig(){
-    store.set("recordingProfile",recordingProfile.value);
-    store.set("recordingArea",recordingArea.value);
-    store.set("screenOption",recordingObject.value);
-    store.set("cameraOption",cameraObject.value);
-    store.set("micOption",micObject.value);
+function saveConfig() {
+    store.set("recordingProfile", recordingProfile.value);
+    store.set("recordingArea", recordingArea.value);
+    store.set("screenOption", recordingObject.value);
+    store.set("cameraOption", cameraObject.value);
+    store.set("micOption", micObject.value);
 }
 
 function toggleRecordButton() {
@@ -182,18 +182,23 @@ async function handleStop() {
 
     var buffer = createBuffer(arrayBuffer);
 
-    const {
-        filePath
-    } = await dialog.showSaveDialog({
-        buttonLabel: "Save recording",
-        defaultPath: `recording-${Date.now()}.mp4`
-    });
+    if (store.get("nextCloudUpload")) {
+        console.log("uploading to NC")
+    } else {
+        const {
+            filePath
+        } = await dialog.showSaveDialog({
+            buttonLabel: "Save recording",
+            defaultPath: `recording-${Date.now()}.mp4`
+        });
 
-    if (filePath) {
-        writeFile(filePath, buffer, (error) => {
-            console.log("Erro ?" + error);
-        })
+        if (filePath) {
+            writeFile(filePath, buffer, (error) => {
+                console.log("Erro ?" + error);
+            })
+        }
     }
+
 }
 
 function fileReaderReady(reader) {
@@ -223,11 +228,11 @@ function createBuffer(arrayBuffer) {
     return buffer;
 }
 
-function writeRecordingProfileOption(){
+function writeRecordingProfileOption() {
     recordingProfile.value = store.get("recordingProfile") ? store.get("recordingProfile") : 0;
 }
 
-function writeRecordingAreaOption(){
+function writeRecordingAreaOption() {
     recordingArea.value = store.get("recordingArea") ? store.get("recordingArea") : 0;
 }
 
@@ -257,7 +262,7 @@ function writeMicOptions(element, options) {
         element.add(optionItem);
     });
 
-        element.value = store.get("micOption") ? store.get("micOption") : 0;
+    element.value = store.get("micOption") ? store.get("micOption") : 0;
 
 }
 
@@ -269,7 +274,7 @@ function writeCameraOptions(element, options) {
         element.add(optionItem);
     });
 
-        element.value = store.get("cameraOption") ? store.get("cameraOption") : 0;
+    element.value = store.get("cameraOption") ? store.get("cameraOption") : 0;
 
 }
 

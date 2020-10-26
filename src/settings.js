@@ -20,7 +20,7 @@ function loadSettings() {
     nextCloudUserInput.value = store.get("nextCloudUser") ? store.get("nextCloudUser") : "";
     nextCloudPassInput.value = store.get("nextCloudPass") ? store.get("nextCloudPass") : "";
     nextCloudURLInput.value = store.get("nextCloudURL") ? store.get("nextCloudURL") : "";
-    nextCloudURLInput.value = store.get("nextCloudUpload") ? nextCloudUploadInput.checked = true : nextCloudUploadInput.checked = false;
+    nextCloudUploadInput.value = store.get("nextCloudUpload") ? nextCloudUploadInput.checked = true : nextCloudUploadInput.checked = false;
 }
 
 function saveSettings() {
