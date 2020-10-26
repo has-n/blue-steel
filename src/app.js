@@ -220,7 +220,7 @@ async function getVideoSources(types) {
 
 function writeMicOptions(element, options) {
     options.map(option=>{
-        var optionItem = documen.createElement("option");
+        var optionItem = document.createElement("option");
         optionItem.text = option.label;
         optionItem.value = option.deviceId;
         element.add(optionItem);
@@ -229,7 +229,7 @@ function writeMicOptions(element, options) {
 
 function writeCameraOptions(element,options){
     options.map(option=>{
-        var optionItem = documen.createElement("option");
+        var optionItem = document.createElement("option");
         optionItem.text = option.label;
         optionItem.value = option.deviceId;
         element.add(optionItem);
