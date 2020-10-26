@@ -1,6 +1,7 @@
 const {
     desktopCapturer,
-    remote
+    remote,
+    ipcRenderer
 } = require("electron");
 
 const {
@@ -22,7 +23,6 @@ var videoStream, desktopStream, micStream, webcamStream;
 const recordingObject = document.getElementById("recordingObject");
 const startRecordButton = document.getElementById("startRecordButton");
 const stopRecordButton = document.getElementById("stopRecordButton");
-const webcamPreview = document.getElementById("webcamPreview");
 
 //Bootstrap
 document.addEventListener("DOMContentLoaded", () => {
@@ -42,34 +42,32 @@ function stopRecording() {
     mediaRecorder.stop();
 }
 
-function shutdownDesktopStream(){
-    if (desktopStream.active){
-        desktopStream.getTracks().forEach(track =>{
-            track.stop();
-        });
-    }
-}
-function shutdownMicStream(){
-    if (micStream.active){
-        micStream.getTracks().forEach(track =>{
-            track.stop();
-        });
-    }
-}
-function shutdownVideoStream(){
-    if (videoStream.active){
-        videoStream.getTracks().forEach(track =>{
+function shutdownDesktopStream() {
+    if (desktopStream.active) {
+        desktopStream.getTracks().forEach(track => {
             track.stop();
         });
     }
 }
 
-function shutdownWebcamStream(){
-    if (webcamStream.active){
-        webcamStream.getTracks().forEach(track =>{
+function shutdownMicStream() {
+    if (micStream.active) {
+        micStream.getTracks().forEach(track => {
             track.stop();
         });
     }
+}
+
+function shutdownVideoStream() {
+    if (videoStream.active) {
+        videoStream.getTracks().forEach(track => {
+            track.stop();
+        });
+    }
+}
+
+function shutdownWebcamStream() {
+    ipcRenderer.send("close-webcam-window");
 }
 
 async function startRecording() {
@@ -115,22 +113,9 @@ async function startRecording() {
 
     desktopStream = await navigator.mediaDevices.getUserMedia(constraintsDesktop);
 
-    const webcamConstraints = {
-        audio:false,
-        video:{
-            mandatory:{
-                minHeight:480,
-                minWidth:300,
-                maxHeight:480,
-                maxWidth:300,
-            }
-        }
-    }
-
-    webcamStream = await navigator.mediaDevices.getUserMedia(webcamConstraints);
-
-    webcamPreview.srcObject =webcamStream;
-    webcamPreview.play();
+    ipcRenderer.send("launch-webcam-window", {
+        data: "something"
+    });
 
     let desktopSource = audioContext.createMediaStreamSource(desktopStream);
     let micSource = audioContext.createMediaStreamSource(micStream);
