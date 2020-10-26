@@ -38,8 +38,8 @@ const createWebcamPreviewWindow = () => {
     width: 400,
     height: 250,
     show:false,
-    //frame:false,
-    //resizable:false,
+    frame:false,
+    resizable:false,
     webPreferences: {
       nodeIntegration: true,
     }

@@ -116,7 +116,7 @@ async function startRecording() {
     desktopStream = await navigator.mediaDevices.getUserMedia(constraintsDesktop);
 
     ipcRenderer.send("launch-webcam-window", {
-        data: cameraObject.value,
+        deviceId: cameraObject.value,
     });
 
     let desktopSource = audioContext.createMediaStreamSource(desktopStream);
