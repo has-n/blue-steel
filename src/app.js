@@ -12,14 +12,19 @@ const {
     dialog
 } = remote;
 
+const Store = require("electron-store");
+
 //Globally scoped variables
 var recordedChunks = [];
 var mediaRecorder;
 var recordingState = false;
 var audioContext = new AudioContext();
-var videoStream, desktopStream, micStream, webcamStream;
+var videoStream, desktopStream, micStream;
+const store = new Store();
 
 //Configuration
+const recordingProfile = document.getElementById("recordingProfile");
+const recordingArea = document.getElementById("recordingArea");
 const recordingObject = document.getElementById("recordingObject");
 const startRecordButton = document.getElementById("startRecordButton");
 const stopRecordButton = document.getElementById("stopRecordButton");
@@ -120,7 +125,7 @@ async function startRecording() {
     desktopStream = await navigator.mediaDevices.getUserMedia(constraintsDesktop);
 
     //if user has selected webcam, launch it
-    if (cameraObject.value!=0) {
+    if (cameraObject.value != 0) {
         ipcRenderer.send("launch-webcam-window", {
             deviceId: cameraObject.value,
         });
@@ -139,9 +144,18 @@ async function startRecording() {
     mediaRecorder.start();
     recordingState = true;
     toggleRecordButton();
+    saveConfig();
 
     mediaRecorder.ondataavailable = handleDataAvailable;
     mediaRecorder.onstop = handleStop;
+}
+
+function saveConfig(){
+    store.set("recordingProfile",recordingProfile.value);
+    store.set("recordingArea",recordingArea.value);
+    store.set("screenOption",recordingObject.value);
+    store.set("cameraOption",cameraObject.value);
+    store.set("micOption",micObject.value);
 }
 
 function toggleRecordButton() {
@@ -209,6 +223,14 @@ function createBuffer(arrayBuffer) {
     return buffer;
 }
 
+function writeRecordingProfileOption(){
+    recordingProfile.value = store.get("recordingProfile") ? store.get("recordingProfile") : 0;
+}
+
+function writeRecordingAreaOption(){
+    recordingArea.value = store.get("recordingArea") ? store.get("recordingArea") : 0;
+}
+
 function writeVideoOptions(element, options) {
     options.map(option => {
         var optionItem = document.createElement("option");
@@ -216,6 +238,8 @@ function writeVideoOptions(element, options) {
         optionItem.value = option.id;
         element.add(optionItem);
     });
+
+    element.value = store.get("screenOption") ? store.get("screenOption") : 0;
 }
 
 async function getVideoSources(types) {
@@ -232,6 +256,9 @@ function writeMicOptions(element, options) {
         optionItem.value = option.deviceId;
         element.add(optionItem);
     });
+
+        element.value = store.get("micOption") ? store.get("micOption") : 0;
+
 }
 
 function writeCameraOptions(element, options) {
@@ -241,6 +268,9 @@ function writeCameraOptions(element, options) {
         optionItem.value = option.deviceId;
         element.add(optionItem);
     });
+
+        element.value = store.get("cameraOption") ? store.get("cameraOption") : 0;
+
 }
 
 async function getDeviceSources() {
@@ -265,6 +295,8 @@ async function getDeviceSources() {
         micOptions
     } = await getDeviceSources();
 
+    writeRecordingProfileOption();
+    writeRecordingAreaOption();
     writeCameraOptions(cameraObject, cameraOptions);
     writeMicOptions(micObject, micOptions);
 
