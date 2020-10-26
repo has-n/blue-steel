@@ -37,6 +37,7 @@ const createWebcamPreviewWindow = () => {
     parent: mainWindow,
     width: 400,
     height: 250,
+    show:false,
     //frame:false,
     //resizable:false,
     webPreferences: {
@@ -49,6 +50,7 @@ const createWebcamPreviewWindow = () => {
 
 app.on('ready', () => {
   createWindow();
+  createWebcamPreviewWindow();
 });
 
 app.on('window-all-closed', () => {
@@ -64,8 +66,9 @@ app.on('activate', () => {
 });
 
 
-ipcMain.on("launch-webcam-window", () => {
-  createWebcamPreviewWindow();
+ipcMain.on("launch-webcam-window", (event,options) => {
+  webcamPreviewDialog.show();
+  webcamPreviewDialog.webContents.send("startWebcamStreamEvent",options);
 });
 
 ipcMain.on("close-webcam-window", () => {
